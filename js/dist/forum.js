@@ -150,8 +150,10 @@ flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.initializers.add('flarum-pushe
       }
     });
     loadPusher.resolve({
-      main: socket.subscribe('public'),
-      user: flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.session.user ? socket.subscribe('private-user' + flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.session.user.id()) : null,
+      channels: {
+        main: socket.subscribe('public'),
+        user: flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.session.user ? socket.subscribe('private-user' + flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.session.user.id()) : null
+      },
       pusher: socket
     });
   });
@@ -161,7 +163,8 @@ flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.initializers.add('flarum-pushe
     var _this = this;
 
     if (isInitialized) return;
-    flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.pusher.then(function (pusher) {
+    flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.pusher.then(function (binding) {
+      var pusher = binding.pusher;
       pusher.bind('newPost', function (data) {
         var params = _this.props.params;
 
@@ -258,14 +261,16 @@ flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.initializers.add('flarum-pushe
         }
       });
       Object(flarum_extend__WEBPACK_IMPORTED_MODULE_0__["extend"])(context, 'onunload', function () {
-        return channels.main.unbind('newPost');
+        return pusher.unbind('newPost');
       });
     });
   });
   Object(flarum_extend__WEBPACK_IMPORTED_MODULE_0__["extend"])(flarum_components_IndexPage__WEBPACK_IMPORTED_MODULE_4___default.a.prototype, 'actionItems', function (items) {
     items.remove('refresh');
   });
-  flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.pusher.then(function (channels) {
+  flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.pusher.then(function (bindings) {
+    var channels = bindings.channels;
+
     if (channels.user) {
       channels.user.bind('notification', function () {
         flarum_app__WEBPACK_IMPORTED_MODULE_1___default.a.session.user.pushAttributes({
